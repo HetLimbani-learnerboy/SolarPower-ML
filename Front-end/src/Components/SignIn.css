@@ -143,9 +143,10 @@ button:focus, a:focus { outline: 3px solid rgba(59,130,246,0.18); outline-offset
 .toggle-password img { width: 22px; height: 22px; }
 .signin-btn { background: #ff9800; color: #fff; padding: 12px 0; border: none; border-radius: 50px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.3s ease, transform 0.2s ease; margin-top: 1rem; }
 .signin-btn:hover { background: #fb8c00; transform: translateY(-2px); }
-.forget-password { display: block; margin-top: 0.8rem; font-size: 0.9rem; color: #ffcc80; cursor: pointer; }
-.switch-text, .switch-text-back { margin-top: 1rem; font-size: 0.9rem; color: var(--text); }
-.switch-text span, .switch-text-back span { color: #ff9800; cursor: pointer; }
+.forget-password { margin-left: 58%;display: block; margin-top: 0.8rem; font-size: 0.9rem; color: #ff9800; cursor: pointer;font-weight: bolder; }
+.switch-text, .switch-text-back { margin-top: 1rem; font-size: 0.9rem; color: var(--text); font-weight: bolder; }
+.switch-text span, .switch-text-back span { color: #ff9800; cursor: pointer; font-weight: bolder;}
+.forget-password:hover,.switch-text span:hover, .switch-text-back span:hover{ text-decoration:underline;}
 
 /* ---------- Responsive ---------- */
 @media (max-width: 980px){
