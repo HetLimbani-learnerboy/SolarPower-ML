@@ -10,14 +10,13 @@ const SignIn = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    // Apply theme from localStorage
     useEffect(() => {
         const savedTheme = localStorage.getItem("sp_theme") || "light";
         document.documentElement.setAttribute("data-theme", savedTheme);
     }, []);
 
     const togglePassword = (e) => {
-        e.preventDefault(); 
+        e.preventDefault();
         setShowPassword(prev => !prev);
     };
 
