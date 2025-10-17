@@ -93,7 +93,7 @@ const SignUp = () => {
                             onClick={() => setPasswordVisible(!passwordVisible)}
                         >
                             <img
-                                src={passwordVisible ? eyeOpen : eyeClose}  // fixed here
+                                src={passwordVisible ? eyeOpen : eyeClose}
                                 alt={passwordVisible ? "Hide" : "Show"}
                             />
                         </span>
