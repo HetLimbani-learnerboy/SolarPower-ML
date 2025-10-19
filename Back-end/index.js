@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
@@ -38,16 +37,14 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-// configure nodemailer transporter
 const transporter = nodemailer.createTransport({
-  service: 'Gmail', // or use other SMTP provider
+  service: 'Gmail', 
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
 });
 
-// helper
 function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
@@ -70,10 +67,8 @@ async function sendOtpEmail(toEmail, otp) {
   });
 }
 
-// routes
 app.get('/', (req, res) => res.send('Hello from SolarPower-ML Back-end!'));
 
-// POST /api/signup --> create user, generate & send otp
 app.post('/api/signup', async (req, res) => {
   const { fullname, email, password, phonenumber } = req.body;
   if (!fullname || !email || !password) {
@@ -87,7 +82,7 @@ app.post('/api/signup', async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 10);
 
     const otp = generateOtp();
-    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); 
 
     const user = new User({
       fullname,
@@ -99,13 +94,10 @@ app.post('/api/signup', async (req, res) => {
     });
 
     await user.save();
-
-    // send OTP email (production)
     try {
       await sendOtpEmail(email, otp);
     } catch (mailErr) {
       console.error("Failed to send OTP email:", mailErr);
-      // optionally: delete user if email fails — here we inform client
       return res.status(500).json({ message: 'Failed to send verification email' });
     }
 
@@ -124,7 +116,6 @@ app.post('/api/signup', async (req, res) => {
   }
 });
 
-// GET /api/signup/resend-otp/:id -> regenerate OTP, send email
 app.get('/api/signup/resend-otp/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -151,7 +142,6 @@ app.get('/api/signup/resend-otp/:id', async (req, res) => {
   }
 });
 
-// POST /api/signup/verify/:id -> verify OTP
 app.post('/api/signup/verify/:id', async (req, res) => {
   const { id } = req.params;
   const { otp } = req.body;
@@ -193,6 +183,33 @@ app.post('/api/signup/verify/:id', async (req, res) => {
     return res.status(500).json({ message: 'Server error' });
   }
 });
+
+app.post('/api/signin', async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Please enter all required fields' });
+        }
+    try {
+        const user = await User.findOne({ email });
+        if (!user) return res.status(401).json({ message: 'User does not exist' });
+        if (!user.isverified) return res.status(401).json({ message: 'Email not verified' });
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
+        return res.status(200).json({
+            message: 'Login successful',
+            user: {
+                id: user._id,
+                fullname: user.fullname,
+                email: user.email,
+                phonenumber: user.phonenumber,
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Server error' });
+    }
+});
+
 
 connectDB().then(() => {
   app.listen(port, () => {
