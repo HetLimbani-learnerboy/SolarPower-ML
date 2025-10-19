@@ -20,10 +20,30 @@ const SignIn = () => {
         setShowPassword(prev => !prev);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        alert("Login successful!");
-        navigate("/commondashboard");
+        try {
+            const response = await fetch('http://localhost:3011/api/signin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            });
+            const data = await response.json();
+            if (response.ok) {
+                localStorage.setItem("user", JSON.stringify(data.user));
+                localStorage.setItem("fullname", data.user.fullname);
+                localStorage.setItem("email", data.user.email);
+                alert("Login successful!");
+                navigate("/MainDashboard");
+            } else {
+                alert(data.message || "Login failed");
+            }
+        } catch (error) {
+            console.error(err);
+            alert("Something went wrong!");
+        }
     };
 
     return (
