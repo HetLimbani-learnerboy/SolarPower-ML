@@ -3,8 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./WeatherPage.css";
 
-const API_KEY = "b960d4c56b35feccf353975a4257aab2";
-const BASE_URL = "https://api.openweathermap.org/data/2.5/";
+const API_KEY = process.env.API_KEY;
+const BASE_URL = process.env.BASE_URL;
 
 export default function WeatherApp() {
   const [city, setCity] = useState("");
