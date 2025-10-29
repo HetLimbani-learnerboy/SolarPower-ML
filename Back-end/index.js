@@ -25,6 +25,7 @@ const connectDB = async () => {
   }
 };
 
+
 const userSchema = new mongoose.Schema({
   fullname: { type: String, required: true },
   email:    { type: String, required: true, unique: true },
@@ -66,6 +67,25 @@ async function sendOtpEmail(toEmail, otp) {
     html,
   });
 }
+
+async function sendResetPasswordEmail(toEmail, otp) {
+  const from = process.env.EMAIL_FROM || process.env.EMAIL_USER;
+  const html = `
+    <div style="font-family: Arial, Helvetica, sans-serif; font-size:16px; color:#222;">
+      <h3>SolarPower-ML — Password Reset</h3>
+      <p>Your password reset code is:</p>
+      <p style="font-size:22px; letter-spacing:4px;"><strong>${otp}</strong></p>
+      <p>This code will expire in 5 minutes.</p>
+    </div>
+  `;
+  return transporter.sendMail({
+    from,
+    to: toEmail,
+    subject: "SolarPower-ML Password Reset",
+    html,
+  });
+}
+
 
 app.get('/', (req, res) => res.send('Hello from SolarPower-ML Back-end!'));
 
@@ -208,6 +228,97 @@ app.post('/api/signin', async (req, res) => {
         console.error(err);
         return res.status(500).json({ message: 'Server error' });
     }
+});
+
+app.delete('/api/signin/emailnotverified', async (req, res) => {
+    const { email } = req.body;
+    try {
+        const user = await User.findOneAndDelete({ email, isverified: false });
+        if (!user) {
+            return res.status(404).json({ message: 'No unverified user found with this email' });
+        }
+        return res.status(200).json({ message: 'Unverified user deleted successfully' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Server error' });
+    }
+});
+
+
+app.post('/api/signin/forgotpassword/auth', async (req, res) => {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email is required' });
+    try{
+        const user= await User.findOne({ email });
+        if(!user) return res.status(404).json({ message: 'User not found' });
+        const otp = generateOtp();
+        user.otp = otp;
+        user.otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+        await user.save();
+        try {
+            await sendResetPasswordEmail(email, otp);
+        } catch (mailErr) {
+            console.error("Failed to send OTP email:", mailErr);
+            return res.status(500).json({ message: 'Failed to send OTP email' });
+        }
+        return res.status(200).json({ message: 'OTP sent to email' });  
+    }
+    catch(err){
+        console.error(err);
+        return res.status(500).json({ message: 'Server error' });
+    }
+});
+
+app.post('/api/signin/forgotpassword/verify',async (req, res) => {
+  const { email, otp } = req.body;
+  if (!email || !otp) return res.status(400).json({ message: 'Email and OTP are required' });
+  try{
+    const user = await User.findOne({ email });
+    if(!user) return res.status(404).json({ message: 'User not found' });
+    if(!user.otp || !user.otpExpiry){
+      return res.status(400).json({ message: 'No OTP found. Please request a new one.' });
+    }
+    if(new Date() > new Date(user.otpExpiry)){
+      return res.status(400).json({ message: 'OTP expired. Please request a new one.' });
+    }
+    if(user.otp !== otp){
+      return res.status(400).json({ message: 'Invalid OTP' });
+    }
+    return res.status(200).json({ message: 'OTP verified' });
+  }
+  catch(err){
+    console.error(err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+}
+);
+
+app.patch('/api/signin/forgotpassword/reset', async (req, res) => {
+  const { email, otp, password } = req.body;
+  if (!email || !otp || !password) return res.status(400).json({ message: 'Email, OTP and new password are required' });
+  try{
+    const user = await User.findOne({ email });
+    if(!user) return res.status(404).json({ message: 'User not found' });
+    if(!user.otp || !user.otpExpiry){
+      return res.status(400).json({ message: 'No OTP found. Please request a new one.' });
+    }
+    if(new Date() > new Date(user.otpExpiry)){
+      return res.status(400).json({ message: 'OTP expired. Please request a new one.' });
+    }
+    if(user.otp !== otp){
+      return res.status(400).json({ message: 'Invalid OTP' });
+    }
+    const passwordHash = await bcrypt.hash(password, 10);
+    user.password = passwordHash;
+    user.otp = undefined;
+    user.otpExpiry = undefined;
+    await user.save();
+    return res.status(200).json({ message: 'Password reset successful' });
+  }
+  catch(err){
+    console.error(err);
+    return res.status(500).json({ message: 'Server error' });
+  }
 });
 
 
