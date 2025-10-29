@@ -46,7 +46,7 @@ const Landingpage = () => {
           <div className="lp-actions">
             <button className="lp-btn lp-ghost" aria-label="Log in" onClick={() => navigate('/signinpage')}>Log In</button>
             <button className="lp-btn lp-ghost" aria-label="Sign up" onClick={() => navigate('/signuppage')}>Sign Up</button>
-            <button className="lp-btn lp-primary" aria-label="Get forecast">Get Forecast</button>
+            <button className="lp-btn lp-primary" aria-label="Get forecast" onClick={()=>navigate('/weatherpage')}>Get Forecast</button>
             <a href="#features" className="lp-btn lp-link" aria-label="Learn more">Learn More ↓</a>
             <button
               className="lp-toggle"
