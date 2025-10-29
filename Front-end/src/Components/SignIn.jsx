@@ -38,7 +38,16 @@ const SignIn = () => {
                 alert("Login successful!");
                 navigate("/MainDashboard");
             } else {
-                alert(data.message || "Login failed");
+                alert((data && data.message ? data.message : "Login failed") + ", Please Signup Again");
+                const response = await fetch('http://localhost:3011/api/signin/emailnotverified', {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ email }),
+                });
+
+                const deleteData = await response.json();
             }
         } catch (error) {
             console.error(err);
@@ -88,7 +97,7 @@ const SignIn = () => {
                         <button type="submit" className="signin-btn">Sign In</button>
                     </form>
 
-                    <span className="forget-password" onClick={() => navigate("/forgetpassword")}>
+                    <span className="forget-password" onClick={() => navigate("/forgotpassword")}>
                         Forgot Password?
                     </span>
 
