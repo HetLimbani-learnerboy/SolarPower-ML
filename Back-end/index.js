@@ -25,7 +25,6 @@ const connectDB = async () => {
   }
 };
 
-
 const userSchema = new mongoose.Schema({
   fullname: { type: String, required: true },
   email:    { type: String, required: true, unique: true },
@@ -327,3 +326,4 @@ connectDB().then(() => {
     console.log(`Server running on port ${port}`);
   });
 });
+
