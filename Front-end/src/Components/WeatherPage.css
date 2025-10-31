@@ -1,0 +1,138 @@
+
+/* 🌤️ Main container */
+.weather-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 90%, transparent 10%) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  font-family: 'Poppins', sans-serif;
+  padding: var(--space-5);
+  color: var(--text);
+}
+
+/* Title */
+.weather-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: var(--space-4);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Input section */
+.input-section {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.city-input {
+  padding: 12px 16px;
+  width: 260px;
+  border: 1px solid rgba(59,130,246,0.25);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transition: 0.3s ease;
+}
+
+.city-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(59,130,246,0.15);
+}
+
+.get-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  box-shadow: 0 8px 20px rgba(59,130,246,0.15);
+}
+
+.get-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Error message */
+.error-text {
+  color: #f44336;
+  font-weight: 600;
+  margin-bottom: var(--space-3);
+}
+
+/* Weather data card */
+.weather-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-4);
+  width: min(600px, 90%);
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.weather-card h2 {
+  margin: 0 0 var(--space-3);
+  color: var(--text);
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Table styling */
+.weather-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.weather-table td {
+  padding: 10px 6px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 0.98rem;
+}
+
+.weather-table td:first-child {
+  color: var(--text);
+  font-weight: 800;
+  font-size: 600;
+  width: 50%;
+}
+
+.weather-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Small animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive design */
+@media (max-width: 720px) {
+  .weather-card {
+    width: 100%;
+    padding: var(--space-3);
+  }
+
+  .weather-title {
+    font-size: 1.6rem;
+  }
+
+  .city-input {
+    width: 200px;
+  }
+}
