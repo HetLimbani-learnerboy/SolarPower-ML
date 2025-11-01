@@ -320,6 +320,86 @@ app.patch('/api/signin/forgotpassword/reset', async (req, res) => {
   }
 });
 
+// app.post("/api/predict/solarpower", async (req, res) => {
+//   const inputData = req.body;
+
+//   try {
+//     // ✅ Ensure correct order of features as per training model
+//     const features = [
+//       Number(inputData.IsDaylight ? 1 : 0),
+//       parseFloat(inputData.Distance_to_Solar_Noon || 0),
+//       parseFloat(inputData.Average_Temperature),
+//       parseFloat(inputData.Average_Wind_Direction),
+//       parseFloat(inputData.Average_Wind_Speed),
+//       parseFloat(inputData.Sky_Cover),
+//       parseFloat(inputData.Visibility),
+//       parseFloat(inputData.Relative_Humidity),
+//       parseFloat(inputData.Average_Barometric_Pressure),
+//       parseInt(inputData.Month),
+//       parseInt(inputData.Day),
+//     ];
+
+//     // ✅ Send to Flask model
+//     const response = await fetch("http://localhost:8000/predict", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ features }),
+//     });
+
+//     const data = await response.json();
+
+//     if (!response.ok) {
+//       return res.status(500).json({
+//         message: "Flask prediction failed",
+//         error: data,
+//       });
+//     }
+
+//     return res.status(200).json(data);
+//   } catch (err) {
+//     console.error("Error communicating with Flask server:", err);
+//     return res
+//       .status(500)
+//       .json({ message: "Server error while fetching prediction" });
+//   }
+// });
+
+
+// ✅ This is the entire, corrected route.
+// It just forwards the request body to the Flask server.
+
+app.post("/api/predict/solarpower", async (req, res) => {
+  const inputData = req.body; // This is the JSON object from React
+
+  try {
+    // ✅ Forward the *entire JSON body* to the Flask model
+    const response = await fetch("http://localhost:8000/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(inputData), // Pass the JSON object as-is
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        message: "Flask prediction server returned an error",
+        error: data,
+      });
+    }
+
+    // ✅ Send the successful prediction back to the frontend
+    return res.status(200).json(data);
+    
+  } catch (err) {
+    console.error("Error communicating with Flask server:", err);
+    return res
+      .status(500)
+      .json({ message: "Server error while fetching prediction", error: err.message });
+  }
+});
+
+
 
 connectDB().then(() => {
   app.listen(port, () => {
