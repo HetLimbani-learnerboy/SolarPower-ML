@@ -245,6 +245,28 @@
     gap: 8px;
 }
 
+.capacity-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: min(550px, 90%);
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: var(--surface);
+  border-radius: 14px;
+  box-shadow: var(--shadow-md);
+}
+
+.capacity-form label {
+  font-weight: 600;
+  color: var(--accent);
+  font-size: 1.1rem;
+}
+
+.capacity-form .wp-input {
+  width: 100%;
+}
+
 .unlock-btn {
     background: linear-gradient(90deg, #10b981, #059669);
     color: white;
