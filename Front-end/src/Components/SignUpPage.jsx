@@ -4,11 +4,10 @@ import eyeOpen from '../assets/eye_open.png';
 import eyeClose from '../assets/eye-close.svg';
 import "./SignUpPage.css";
 
-const API_BASE = "http://localhost:3011"; 
+const API_BASE = "http://localhost:3011";
 
 const SignUp = () => {
     const navigate = useNavigate();
-
     const [step, setStep] = useState(1);
     const [userId, setUserId] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -32,8 +31,8 @@ const SignUp = () => {
 
     const OTP_LENGTH = 6;
     const [otpValues, setOtpValues] = useState(new Array(OTP_LENGTH).fill(""));
-    const inputsRef = useRef([]); 
-    const [maskAfterDelay, setMaskAfterDelay] = useState(false); 
+    const inputsRef = useRef([]);
+    const [maskAfterDelay, setMaskAfterDelay] = useState(false);
     const [resendLoading, setResendLoading] = useState(false);
     const [otpError, setOtpError] = useState("");
 
@@ -111,8 +110,8 @@ const SignUp = () => {
 
     const onOtpChange = (e, index) => {
         const val = e.target.value;
-        if (!/^[0-9]?$/.test(val)) return; 
-        
+        if (!/^[0-9]?$/.test(val)) return;
+
         const next = [...otpValues];
         next[index] = val;
         setOtpValues(next);
@@ -131,7 +130,7 @@ const SignUp = () => {
             const next = [...otpValues];
             next[index] = "";
             setOtpValues(next);
-            
+
             if (index > 0) {
                 inputsRef.current[index - 1]?.focus();
             }
@@ -290,10 +289,10 @@ const SignUp = () => {
                                     <input
                                         key={index}
                                         className="otp-input"
-                                        type="text" 
-                                        inputMode="numeric" 
+                                        type="text"
+                                        inputMode="numeric"
                                         maxLength="1"
-                                        value={value} 
+                                        value={value}
                                         onChange={(e) => onOtpChange(e, index)}
                                         onKeyDown={(e) => onOtpKeyDown(e, index)}
                                         ref={(el) => (inputsRef.current[index] = el)}

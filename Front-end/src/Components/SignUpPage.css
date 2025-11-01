@@ -81,7 +81,7 @@
     position: absolute;
     right: 10px;
     top: 50%;
-    transform: translateY(-50%); 
+    transform: translateY(-50%);
     cursor: pointer;
     font-size: 1.1rem;
     background: rgba(255, 255, 255, 0.15);
@@ -118,7 +118,7 @@
     color: var(--accent);
     font-weight: bolder;
     text-decoration: none;
-    cursor: pointer; 
+    cursor: pointer;
 }
 
 .signup-switch-text .auth-link:hover {
@@ -140,7 +140,6 @@
     text-decoration: underline;
 }
 
-
 .otp-screen {
     display: flex;
     flex-direction: column;
@@ -151,7 +150,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.5rem; 
+    gap: 1.5rem;
     width: 100%;
     margin-top: 1rem;
 }

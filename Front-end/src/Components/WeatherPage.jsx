@@ -14,11 +14,10 @@ const WeatherPage = () => {
   const [loading, setLoading] = useState(false);
   const [showExtended, setShowExtended] = useState(false);
 
-  // Apply saved theme
   const theme = localStorage.getItem("sp_theme") || "dark";
   document.documentElement.setAttribute("data-theme", theme);
 
-  // 🌬️ Average wind direction (convert to 1–32 compass scale)
+  // Helper — average wind direction on compass (1–32)
   const avgWindDirection = (dirs) => {
     if (!dirs.length) return 0;
     const radians = dirs.map((deg) => (deg * Math.PI) / 180);
@@ -31,9 +30,22 @@ const WeatherPage = () => {
     return scale > 32 ? 1 : scale;
   };
 
-  // 📊 Helper function to calculate averages and scaling
-  const calculateDailyAverages = (entries) => {
-    const avg = (arr) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0);
+  // Helper function for scaling (if needed for display, but not for prediction payload)
+  const scaleToRange = (
+    value,
+    oldMin,
+    oldMax,
+    newMin = 0.050400916,
+    newMax = 1.141361257
+  ) => {
+    const scaled =
+      ((value - oldMin) / (oldMax - oldMin)) * (newMax - newMin) + newMin;
+    return Number(scaled.toFixed(6));
+  };
+
+  const calculateDailyAverages = (entries, longitude, latitude) => {
+    const avg = (arr) =>
+      arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
 
     const temps = entries.map((e) => e.main.temp);
     const directions = entries.map((e) => e.wind.deg);
@@ -43,33 +55,46 @@ const WeatherPage = () => {
     const pressures = entries.map((e) => e.main.pressure);
     const visibilities = entries.map((e) => e.visibility || 0);
 
+    const avgTempC = avg(temps);
+    const avgTempF = (avgTempC * 9 / 5) + 32;
+
+    const avgWind_ms = avg(winds);
+    const avgWind_kmh = (avgWind_ms * 3.6).toFixed(1);
+    const avgWind_mph = (avgWind_ms * 2.23694).toFixed(1);
+
     const avgClouds = avg(clouds);
     const avgVisibility = avg(visibilities);
     const avgPressure = avg(pressures);
 
-    // ☁️ Scale clouds: 0–100 → 0–4
     const scaledClouds = Math.round((avgClouds / 100) * 4);
     const finalClouds = Math.min(Math.max(scaledClouds, 0), 4);
 
-    // 👁️ Scale visibility: 0–10000 → 1–10 (√ curve for sensitivity)
-    const visibilityScore = Math.pow(avgVisibility / 10000, 0.5) * 10;
+    const MAX_EXPECTED_VISIBILITY = 10000;
+    const visibilityRatio = avgVisibility / MAX_EXPECTED_VISIBILITY;
+    const visibilityScore = Math.pow(visibilityRatio, 0.5) * 10;
     const finalVisibility = Math.min(Math.max(Math.round(visibilityScore), 1), 10);
 
-    // 🔽 Convert pressure from hPa → inHg (1000 hPa ≈ 29.53 inHg)
     const pressureInHg = (avgPressure * 0.02953).toFixed(2);
 
+    const scaledLongitude = scaleToRange(longitude, -180, 180);
+    const scaledLatitude = scaleToRange(latitude, -90, 90);
+
     return {
-      temp: Math.round(avg(temps)), // °C
-      humidity: Math.round(avg(humidities)), // %
-      wind_speed: (avg(winds) * 3.6).toFixed(1), // m/s → km/h
-      winddirection: avgWindDirection(directions), // 1–32 scale
-      clouds: finalClouds, // 0–4
-      pressure: parseFloat(pressureInHg), // inHg
-      visibility: finalVisibility, // 1–10
+      temp_c: Math.round(avgTempC),
+      temp_f: Math.round(avgTempF),
+      wind_speed_kmh: avgWind_kmh,
+      wind_speed_mph: parseFloat(avgWind_mph),
+      winddirection: avgWindDirection(directions),
+      humidity: Math.round(avg(humidities)),
+      clouds: finalClouds,
+      pressure: parseFloat(pressureInHg),
+      visibility: finalVisibility,
+      longitude: scaledLongitude,
+      latitude: scaledLatitude,
     };
   };
 
-  // 🌦️ Fetch weather data
+
   const fetchWeatherData = async (e) => {
     e.preventDefault();
     if (!location) return alert("Please enter a location!");
@@ -86,8 +111,6 @@ const WeatherPage = () => {
 
       if (response.ok) {
         setCity(`${data.city.name}, ${data.city.country}`);
-
-        // Group forecast by day
         const grouped = data.list.reduce((acc, entry) => {
           const date = entry.dt_txt.split(" ")[0];
           acc[date] = acc[date] ? [...acc[date], entry] : [entry];
@@ -134,7 +157,6 @@ const WeatherPage = () => {
         Get a summarized 1-day forecast and unlock 6-day extended view after sign-in.
       </p>
 
-      {/* 🔍 Input form */}
       <form className="wp-form" onSubmit={fetchWeatherData}>
         <label className="wp-label">Enter Location:</label>
         <input
@@ -156,43 +178,25 @@ const WeatherPage = () => {
 
       {loading && <p className="loading">⏳ Loading forecast...</p>}
 
-      {/* 🌤️ 1-Day Forecast */}
       {forecast && (
         <div className="forecast-results">
-          <h2>📍 Forecast for {city}</h2>
-          <h3>📅 1-Day Summary ({forecast.date})</h3>
           <div className="forecast-card">
-            <p>🌡️ Avg Temp: {forecast.temp}°C</p>
+            <h2>📍 Forecast for {city}</h2>
+            <h3>📅 1-Day Summary ({forecast.date})</h3>
+            <p>Longitude: {forecast.longitude}</p>
+            <p>Latitude: {forecast.latitude}</p>
+            <p>🌡️ Avg Temp: {forecast.temp_c}°C ({forecast.temp_f}°F)</p>
             <p>💧 Humidity: {forecast.humidity}%</p>
-            <p>💨 Wind Speed: {forecast.wind_speed} km/h</p>
-            <p>🎯 Wind Direction (1–32): {forecast.winddirection}</p>
-            <p>☁️ Cloud Cover: {forecast.clouds} out of 4</p>
-            {/* <p>👁️ Visibility: {forecast.visibility} out of 10</p> */}
+            <p>💨 Wind Speed: {forecast.wind_speed_kmh} km/h</p>
+            <p>🎯 Wind Direction(1-32): {forecast.winddirection} </p>
+            <p>☁️ Cloud Cover: {forecast.clouds} out of 4 </p>
+            <p>👁️ Visibility: {forecast.visibility} out of 10 </p>
             <p>🔽 Pressure: {forecast.pressure} inHg</p>
           </div>
 
           <button className="unlock-btn" onClick={handleUnlock}>
             🔓 Unlock 6-Day Forecast (Sign In Required)
           </button>
-        </div>
-      )}
-
-      {/* 📆 Extended Forecast */}
-      {showExtended && extendedForecast.length > 0 && (
-        <div className="forecast-results">
-          <h3>📆 Extended 6-Day Forecast</h3>
-          {extendedForecast.map((d, i) => (
-            <div key={i} className="forecast-card">
-              <h4>{d.date}</h4>
-              <p>🌡️ Avg Temp: {d.temp}°C</p>
-              <p>💧 Humidity: {d.humidity}%</p>
-              <p>💨 Wind Speed: {d.wind_speed} km/h</p>
-              <p>🎯 Wind Dir (1–32): {d.winddirection}</p>
-              <p>☁️ Clouds: {d.clouds} / 4</p>
-              <p>👁️ Visibility: {d.visibility} / 10</p>
-              <p>🔽 Pressure: {d.pressure} inHg</p>
-            </div>
-          ))}
         </div>
       )}
     </div>

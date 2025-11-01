@@ -1,11 +1,6 @@
-/* 🌤️ Root container */
 .wp-root {
   min-height: 100vh;
-  background: linear-gradient(
-    180deg,
-    var(--bg) 0%,
-    color-mix(in srgb, var(--bg) 85%, transparent 15%) 100%
-  );
+  background: linear-gradient(180deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 85%, transparent 15%) 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -16,9 +11,6 @@
   overflow-x: hidden;
 }
 
-/* =========================
-   🌞 Title & Description
-========================= */
 .wp-title {
   font-size: 2.2rem;
   font-weight: 700;
@@ -38,9 +30,6 @@
   animation: fadeIn 1.2s ease-in;
 }
 
-/* =========================
-   🔍 Input & Buttons
-========================= */
 .wp-form {
   display: flex;
   flex-direction: column;
@@ -129,9 +118,6 @@
   box-shadow: 0 8px 16px rgba(16, 185, 129, 0.25);
 }
 
-/* =========================
-   ☁️ Forecast Results
-========================= */
 .forecast-results {
   width: min(750px, 92%);
   display: flex;
@@ -153,12 +139,10 @@
   text-align: center;
 }
 
-/* =========================
-   🧾 Forecast Card
-========================= */
 .forecast-card {
   background: var(--surface);
   box-shadow: var(--shadow-md);
+  width: min(720px, 92%);
   border-radius: 14px;
   padding: 1.2rem 1.5rem;
   width: 100%;
@@ -183,37 +167,64 @@
   font-size: 0.95rem;
 }
 
-/* =========================
-   🌀 Animations
-========================= */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateY(40px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes popUp {
-  0% { transform: scale(0.95); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
-/* =========================
-   📱 Responsive Design
-========================= */
 @media (max-width: 768px) {
   .wp-root {
     padding: 1.5rem 1rem;

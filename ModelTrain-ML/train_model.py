@@ -277,9 +277,6 @@ from sklearn.impute import KNNImputer
 
 print("Starting model training...")
 
-# ======================================
-# 1️⃣ Load and Clean Data
-# ======================================
 try:
     df = pd.read_csv("Solar_Power_Prediction.csv")
     print("Dataset loaded successfully!")
@@ -306,12 +303,8 @@ imputer = KNNImputer(n_neighbors=3)
 df[numeric_df.columns] = imputer.fit_transform(numeric_df)
 print("Missing values handled.")
 
-# Convert Power Generated from W → kW
 df["Power Generated"] = df["Power Generated"] / 1000
 
-# ======================================
-# 2️⃣ Group by Day (Aggregate Features)
-# ======================================
 daily_power = (
     df.groupby(["Year", "Month", "Day"], as_index=False)
     .agg({
@@ -331,20 +324,14 @@ daily_power = (
 
 daily_power = daily_power.sort_values(by=["Year", "Month", "Day"]).reset_index(drop=True)
 
-# ======================================
-# 3️⃣ Prepare Data for Training
-# ======================================
-# ❌ Drop features we don't use
 drop_cols = ["Power Generated", "Year", "Average Wind Speed (Period)"]
 
-# ❌ Also drop Distance to Solar Noon if it's still there
 if "Distance to Solar Noon" in daily_power.columns:
     daily_power = daily_power.drop(columns=["Distance to Solar Noon"])
 
 X = daily_power.drop(columns=drop_cols)
 y = daily_power["Power Generated"]
 
-# Save feature columns *before* scaling
 X.to_csv("feature_columns.csv", index=False)
 print(f"✅ Features saved. Using: {X.columns.tolist()}")
 
@@ -358,9 +345,7 @@ scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-# ======================================
-# 4️⃣ Train & Save Best Model (Random Forest)
-# ======================================
+
 print("\nTraining Random Forest model...")
 model = RandomForestRegressor(n_estimators=100, random_state=42)
 
@@ -370,8 +355,7 @@ test_r2 = r2_score(y_test, y_test_pred)
 
 print(f"Model trained. Test R²: {test_r2:.4f}")
 
-# Fit again on *full* scaled dataset for final model
-full_X_scaled = scaler.fit_transform(X) # Use fit_transform for the final scaler
+full_X_scaled = scaler.fit_transform(X) 
 model.fit(full_X_scaled, y)
 
 joblib.dump(model, "random_forest_model.pkl")

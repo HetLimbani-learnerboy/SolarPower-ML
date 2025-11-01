@@ -139,12 +139,10 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app)
 
-# === File Paths ===
 MODEL_PATH = "random_forest_model.pkl"
 SCALER_PATH = "scaler.pkl"
 FEATURE_PATH = "feature_columns.csv"
 
-# === Load Model + Scaler + Feature Columns ===
 print("Attempting to load model files...")
 if not os.path.exists(MODEL_PATH) or not os.path.exists(SCALER_PATH) or not os.path.exists(FEATURE_PATH):
     print("❌ ERROR: Model files not found!")
@@ -160,15 +158,11 @@ else:
     print("✅ Model, Scaler, and Features loaded successfully!")
     print(f"Expecting features: {feature_columns}")
 
-# === ❌ distance_to_solar_noon function REMOVED ===
-
-
 @app.route("/", methods=["GET"])
 def home():
     return jsonify({"message": "☀️ Solar Power Prediction Flask API is running!"})
 
 
-# === Prediction Endpoint ===
 @app.route("/predict", methods=["POST"])
 def predict_power():
     if model is None or scaler is None:
@@ -176,7 +170,6 @@ def predict_power():
 
     data = request.get_json()
 
-    # ✅ Updated list of required fields (no lat/lon needed)
     required_fields = [
         "Is Daylight",
         "Average Temperature (Day)",
@@ -190,14 +183,10 @@ def predict_power():
         "Day"
     ]
 
-    # Check for missing fields
     missing = [field for field in required_fields if field not in data]
     if missing:
         return jsonify({"error": f"Missing required fields: {', '.join(missing)}"}), 400
 
-    # === ❌ No Distance to Solar Noon calculation ===
-
-    # ✅ Prepare input DataFrame using data from the request
     try:
         input_dict = {
             "Is Daylight": data["Is Daylight"],
@@ -213,11 +202,9 @@ def predict_power():
             "Day": data["Day"],
         }
 
-        # Ensure consistent feature order
         df_input = pd.DataFrame([input_dict])
         df_input = df_input.reindex(columns=feature_columns, fill_value=0)
 
-        # Scale and predict
         scaled_features = scaler.transform(df_input)
         predicted_kw = float(model.predict(scaled_features)[0])
 
