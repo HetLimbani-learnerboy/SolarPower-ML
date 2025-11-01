@@ -347,6 +347,37 @@ app.post("/api/predict/solarpower", async (req, res) => {
   }
 });
 
+app.post("/api/predict/solarpowerforecast", async (req, res) => {
+  const payloads = req.body;
+
+  if (!Array.isArray(payloads) || payloads.length === 0) {
+    return res.status(400).json({ message: "Invalid input: Expected an array of days." });
+  }
+  try {
+    const predictionPromises = payloads.map(dayPayload => {
+      return fetch("http://localhost:8000/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dayPayload),
+      }).then(response => {
+        if (!response.ok) {
+          return response.json().then(err => Promise.reject(err));
+        }
+        return response.json();
+      });
+    });
+    const results = await Promise.all(predictionPromises);
+    res.status(200).json({ predictions: results });
+
+  } catch (err) {
+    console.error("Error communicating with Flask server:", err);
+    res.status(500).json({
+      message: "Server error while fetching prediction",
+      error: err.message || err,
+    });
+  }
+});
+
 connectDB().then(() => {
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);
