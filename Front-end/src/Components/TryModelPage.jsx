@@ -232,6 +232,7 @@ const TryModelPage = () => {
           <div className="forecast-card">
             <h2>📍 Forecast for {city}</h2>
             <h3>📅 1-Day Summary ({forecast.date})</h3>
+            <h4>You're prediction based on a Solar Power capacity is 17 kWh. Unlock your full 6-day power forecast and other features by signing in!</h4>
             <p>Longitude: {forecast.longitude}</p>
             <p>Latitude: {forecast.latitude}</p>
             <p>🌡️ Avg Temp: {forecast.temp_c}°C ({forecast.temp_f}°F)</p>
@@ -251,10 +252,8 @@ const TryModelPage = () => {
             </button>
           </div>
           {prediction !== null && (
-            <div className="prediction-result">
-              <h3>
-                ⚡ Predicted Solar Power Output: {prediction.toFixed(3)} kW
-              </h3>
+            <div className="prediction-result">     
+                ⚡ Predicted Solar Power Output: {prediction.toFixed(3)} kWh
             </div>
           )}
         </div>

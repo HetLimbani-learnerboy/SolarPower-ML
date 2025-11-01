@@ -1,8 +1,6 @@
 .trymodel-page {
   min-height: 100vh;
-  background: linear-gradient(180deg,
-      var(--bg) 0%,
-      color-mix(in srgb, var(--bg) 85%, transparent 15%) 100%);
+  background: linear-gradient(180deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 85%, transparent 15%) 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -143,8 +141,9 @@
 }
 
 .forecast-card h4 {
-  color: var(--accent, #3b82f6);
-  margin-bottom: 0.6rem;
+  color: var(--text, #3b82f6);
+  text-align: center;
+  margin-bottom: 1.2rem;
 }
 
 .forecast-card p {
@@ -161,7 +160,7 @@
 
 .prediction-btn {
   background: linear-gradient(90deg, #facc15, #eab308);
-  color: #000;
+  color: white;
   font-weight: 700;
   border: none;
   padding: 12px 24px;
@@ -183,7 +182,6 @@
   border: none;
   border-radius: 12px;
   cursor: pointer;
-  margin-top: 1rem;
   font-weight: 600;
   transition: all 0.3s ease;
 }
@@ -194,7 +192,7 @@
 }
 
 .extended-section {
-  margin-top: 2rem;
+  margin-top: 1rem;
   animation: fadeInUp 0.7s ease;
 }
 
@@ -212,7 +210,9 @@
   height: auto;
   border-radius: 12px;
   background: linear-gradient(90deg, #2563eb, #1d4ed8);
-  color: #fff !important;
+  font-size: 1.2rem;
+  text-align: center;
+  color: #fff;
   box-shadow: 0 8px 18px rgba(37, 99, 235, 0.4);
   animation: popUp 0.5s ease;
 }
@@ -275,7 +275,6 @@
   }
 }
 
-/* 📱 Responsive Design */
 @media (max-width: 768px) {
   .trymodel-page {
     padding: 1.5rem 1rem;
