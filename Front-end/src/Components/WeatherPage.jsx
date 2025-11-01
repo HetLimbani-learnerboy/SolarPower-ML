@@ -167,7 +167,7 @@ const WeatherPage = () => {
             <p>💨 Wind Speed: {forecast.wind_speed} km/h</p>
             <p>🎯 Wind Direction (1–32): {forecast.winddirection}</p>
             <p>☁️ Cloud Cover: {forecast.clouds} out of 4</p>
-            <p>👁️ Visibility: {forecast.visibility} out of 10</p>
+            {/* <p>👁️ Visibility: {forecast.visibility} out of 10</p> */}
             <p>🔽 Pressure: {forecast.pressure} inHg</p>
           </div>
 
