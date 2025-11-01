@@ -69,7 +69,7 @@ const Landingpage = () => {
             </p>
 
             <div className="lp-cta-row">
-              <button className="lp-btn lp-primary">Try Demo</button>
+              <button className="lp-btn lp-primary" onClick={()=>navigate('/trymodelpage')}>Try Demo</button>
               <a
                 className="lp-btn lp-outline"
                 href="https://github.com/HetLimbani-learnerboy/SolarPower-ML.git"

@@ -18,7 +18,6 @@ const SignUp = () => {
         email: "",
         password: "",
         confirmPassword: "",
-        phone: "",
     });
 
     const [passwordVisible, setPasswordVisible] = useState(false);
@@ -90,7 +89,6 @@ const SignUp = () => {
                     fullname: formData.name,
                     email: formData.email,
                     password: formData.password,
-                    phonenumber: formData.phone,
                 }),
             });
 
@@ -263,13 +261,6 @@ const SignUp = () => {
                             <div className="password-rules">
                                 <p style={{ color: passwordValid.match ? "green" : "red" }}>• Passwords match</p>
                             </div>
-
-                            <input
-                                type="text"
-                                placeholder="Phone Number"
-                                value={formData.phone}
-                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            />
 
                             <button type="submit" className="signup-btn" disabled={loading}>
                                 {loading ? "Creating..." : "Sign Up"}
