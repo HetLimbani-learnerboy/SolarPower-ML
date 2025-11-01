@@ -27,7 +27,7 @@ const connectDB = async () => {
 
 const userSchema = new mongoose.Schema({
   fullname: { type: String, required: true },
-  email:    { type: String, required: true, unique: true },
+  email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   phonenumber: { type: String },
   isverified: { type: Boolean, default: false },
@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 
 const transporter = nodemailer.createTransport({
-  service: 'Gmail', 
+  service: 'Gmail',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -101,7 +101,7 @@ app.post('/api/signup', async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 10);
 
     const otp = generateOtp();
-    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); 
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
 
     const user = new User({
       fullname,
@@ -204,88 +204,88 @@ app.post('/api/signup/verify/:id', async (req, res) => {
 });
 
 app.post('/api/signin', async (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password) {
-        return res.status(400).json({ message: 'Please enter all required fields' });
-        }
-    try {
-        const user = await User.findOne({ email });
-        if (!user) return res.status(401).json({ message: 'User does not exist' });
-        if (!user.isverified) return res.status(401).json({ message: 'Email not verified' });
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
-        return res.status(200).json({
-            message: 'Login successful',
-            user: {
-                id: user._id,
-                fullname: user.fullname,
-                email: user.email,
-                phonenumber: user.phonenumber,
-            }
-        });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: 'Server error' });
-    }
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Please enter all required fields' });
+  }
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(401).json({ message: 'User does not exist' });
+    if (!user.isverified) return res.status(401).json({ message: 'Email not verified' });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
+    return res.status(200).json({
+      message: 'Login successful',
+      user: {
+        id: user._id,
+        fullname: user.fullname,
+        email: user.email,
+        phonenumber: user.phonenumber,
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Server error' });
+  }
 });
 
 app.delete('/api/signin/emailnotverified', async (req, res) => {
-    const { email } = req.body;
-    try {
-        const user = await User.findOneAndDelete({ email, isverified: false });
-        if (!user) {
-            return res.status(404).json({ message: 'No unverified user found with this email' });
-        }
-        return res.status(200).json({ message: 'Unverified user deleted successfully' });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: 'Server error' });
+  const { email } = req.body;
+  try {
+    const user = await User.findOneAndDelete({ email, isverified: false });
+    if (!user) {
+      return res.status(404).json({ message: 'No unverified user found with this email' });
     }
+    return res.status(200).json({ message: 'Unverified user deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Server error' });
+  }
 });
 
 
 app.post('/api/signin/forgotpassword/auth', async (req, res) => {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ message: 'Email is required' });
-    try{
-        const user= await User.findOne({ email });
-        if(!user) return res.status(404).json({ message: 'User not found' });
-        const otp = generateOtp();
-        user.otp = otp;
-        user.otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
-        await user.save();
-        try {
-            await sendResetPasswordEmail(email, otp);
-        } catch (mailErr) {
-            console.error("Failed to send OTP email:", mailErr);
-            return res.status(500).json({ message: 'Failed to send OTP email' });
-        }
-        return res.status(200).json({ message: 'OTP sent to email' });  
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ message: 'Email is required' });
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    const otp = generateOtp();
+    user.otp = otp;
+    user.otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+    await user.save();
+    try {
+      await sendResetPasswordEmail(email, otp);
+    } catch (mailErr) {
+      console.error("Failed to send OTP email:", mailErr);
+      return res.status(500).json({ message: 'Failed to send OTP email' });
     }
-    catch(err){
-        console.error(err);
-        return res.status(500).json({ message: 'Server error' });
-    }
+    return res.status(200).json({ message: 'OTP sent to email' });
+  }
+  catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Server error' });
+  }
 });
 
-app.post('/api/signin/forgotpassword/verify',async (req, res) => {
+app.post('/api/signin/forgotpassword/verify', async (req, res) => {
   const { email, otp } = req.body;
   if (!email || !otp) return res.status(400).json({ message: 'Email and OTP are required' });
-  try{
+  try {
     const user = await User.findOne({ email });
-    if(!user) return res.status(404).json({ message: 'User not found' });
-    if(!user.otp || !user.otpExpiry){
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user.otp || !user.otpExpiry) {
       return res.status(400).json({ message: 'No OTP found. Please request a new one.' });
     }
-    if(new Date() > new Date(user.otpExpiry)){
+    if (new Date() > new Date(user.otpExpiry)) {
       return res.status(400).json({ message: 'OTP expired. Please request a new one.' });
     }
-    if(user.otp !== otp){
+    if (user.otp !== otp) {
       return res.status(400).json({ message: 'Invalid OTP' });
     }
     return res.status(200).json({ message: 'OTP verified' });
   }
-  catch(err){
+  catch (err) {
     console.error(err);
     return res.status(500).json({ message: 'Server error' });
   }
@@ -295,16 +295,16 @@ app.post('/api/signin/forgotpassword/verify',async (req, res) => {
 app.patch('/api/signin/forgotpassword/reset', async (req, res) => {
   const { email, otp, password } = req.body;
   if (!email || !otp || !password) return res.status(400).json({ message: 'Email, OTP and new password are required' });
-  try{
+  try {
     const user = await User.findOne({ email });
-    if(!user) return res.status(404).json({ message: 'User not found' });
-    if(!user.otp || !user.otpExpiry){
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user.otp || !user.otpExpiry) {
       return res.status(400).json({ message: 'No OTP found. Please request a new one.' });
     }
-    if(new Date() > new Date(user.otpExpiry)){
+    if (new Date() > new Date(user.otpExpiry)) {
       return res.status(400).json({ message: 'OTP expired. Please request a new one.' });
     }
-    if(user.otp !== otp){
+    if (user.otp !== otp) {
       return res.status(400).json({ message: 'Invalid OTP' });
     }
     const passwordHash = await bcrypt.hash(password, 10);
@@ -314,71 +314,21 @@ app.patch('/api/signin/forgotpassword/reset', async (req, res) => {
     await user.save();
     return res.status(200).json({ message: 'Password reset successful' });
   }
-  catch(err){
+  catch (err) {
     console.error(err);
     return res.status(500).json({ message: 'Server error' });
   }
 });
 
-// app.post("/api/predict/solarpower", async (req, res) => {
-//   const inputData = req.body;
-
-//   try {
-//     // ✅ Ensure correct order of features as per training model
-//     const features = [
-//       Number(inputData.IsDaylight ? 1 : 0),
-//       parseFloat(inputData.Distance_to_Solar_Noon || 0),
-//       parseFloat(inputData.Average_Temperature),
-//       parseFloat(inputData.Average_Wind_Direction),
-//       parseFloat(inputData.Average_Wind_Speed),
-//       parseFloat(inputData.Sky_Cover),
-//       parseFloat(inputData.Visibility),
-//       parseFloat(inputData.Relative_Humidity),
-//       parseFloat(inputData.Average_Barometric_Pressure),
-//       parseInt(inputData.Month),
-//       parseInt(inputData.Day),
-//     ];
-
-//     // ✅ Send to Flask model
-//     const response = await fetch("http://localhost:8000/predict", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ features }),
-//     });
-
-//     const data = await response.json();
-
-//     if (!response.ok) {
-//       return res.status(500).json({
-//         message: "Flask prediction failed",
-//         error: data,
-//       });
-//     }
-
-//     return res.status(200).json(data);
-//   } catch (err) {
-//     console.error("Error communicating with Flask server:", err);
-//     return res
-//       .status(500)
-//       .json({ message: "Server error while fetching prediction" });
-//   }
-// });
-
-
-// ✅ This is the entire, corrected route.
-// It just forwards the request body to the Flask server.
 
 app.post("/api/predict/solarpower", async (req, res) => {
-  const inputData = req.body; // This is the JSON object from React
-
+  const inputData = req.body;
   try {
-    // ✅ Forward the *entire JSON body* to the Flask model
     const response = await fetch("http://localhost:8000/predict", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(inputData), // Pass the JSON object as-is
+      body: JSON.stringify(inputData),
     });
-
     const data = await response.json();
 
     if (!response.ok) {
@@ -387,10 +337,8 @@ app.post("/api/predict/solarpower", async (req, res) => {
         error: data,
       });
     }
-
-    // ✅ Send the successful prediction back to the frontend
     return res.status(200).json(data);
-    
+
   } catch (err) {
     console.error("Error communicating with Flask server:", err);
     return res
@@ -398,8 +346,6 @@ app.post("/api/predict/solarpower", async (req, res) => {
       .json({ message: "Server error while fetching prediction", error: err.message });
   }
 });
-
-
 
 connectDB().then(() => {
   app.listen(port, () => {

@@ -7,7 +7,6 @@ const BASE_URL = import.meta.env.VITE_WEATHER_BASE_URL;
 
 const TryModelPage = () => {
   const navigate = useNavigate();
-
   const [location, setLocation] = useState("");
   const [city, setCity] = useState("");
   const [forecast, setForecast] = useState(null);
@@ -49,7 +48,7 @@ const TryModelPage = () => {
     const avg = (arr) =>
       arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
 
-    const temps = entries.map((e) => e.main.temp); 
+    const temps = entries.map((e) => e.main.temp);
     const directions = entries.map((e) => e.wind.deg);
     const humidities = entries.map((e) => e.main.humidity);
     const winds = entries.map((e) => e.wind.speed);
@@ -58,11 +57,11 @@ const TryModelPage = () => {
     const visibilities = entries.map((e) => e.visibility || 0);
 
     const avgTempC = avg(temps);
-    const avgTempF = (avgTempC * 9/5) + 32; 
+    const avgTempF = (avgTempC * 9 / 5) + 32;
 
-    const avgWind_ms = avg(winds); 
-    const avgWind_kmh = (avgWind_ms * 3.6).toFixed(1);      
-    const avgWind_mph = (avgWind_ms * 2.23694).toFixed(1);  
+    const avgWind_ms = avg(winds);
+    const avgWind_kmh = (avgWind_ms * 3.6).toFixed(1);
+    const avgWind_mph = (avgWind_ms * 2.23694).toFixed(1);
 
     const avgClouds = avg(clouds);
     const avgVisibility = avg(visibilities);
@@ -82,16 +81,16 @@ const TryModelPage = () => {
     const scaledLatitude = scaleToRange(latitude, -90, 90);
 
     return {
-      temp_c: Math.round(avgTempC),    
+      temp_c: Math.round(avgTempC),
       temp_f: Math.round(avgTempF),
-      wind_speed_kmh: avgWind_kmh,        
-      wind_speed_mph: parseFloat(avgWind_mph), 
+      wind_speed_kmh: avgWind_kmh,
+      wind_speed_mph: parseFloat(avgWind_mph),
       winddirection: avgWindDirection(directions),
       humidity: Math.round(avg(humidities)),
       clouds: finalClouds,
       pressure: parseFloat(pressureInHg),
       visibility: finalVisibility,
-      longitude: scaledLongitude, 
+      longitude: scaledLongitude,
       latitude: scaledLatitude,
     };
   };
@@ -124,12 +123,12 @@ const TryModelPage = () => {
         const today = dates[0];
 
         const todayAvg = calculateDailyAverages(grouped[today], lon, lat);
-        
+
         setForecast({
           date: today,
           ...todayAvg,
-          raw_lon: lon, 
-          raw_lat: lat, 
+          raw_lon: lon,
+          raw_lat: lat,
         });
 
         const nextDays = dates.slice(1, 7).map((d) => ({
@@ -158,12 +157,12 @@ const TryModelPage = () => {
     setPrediction(null);
 
     const forecastDate = new Date(forecast.date);
-    
+
     const payload = {
-      "Is Daylight": 1, 
-      "Average Temperature (Day)": forecast.temp_f, // Send Fahrenheit
+      "Is Daylight": 1,
+      "Average Temperature (Day)": forecast.temp_f,
       "Average Wind Direction (Day)": forecast.winddirection,
-      "Average Wind Speed (Day)": forecast.wind_speed_mph, // Send mph
+      "Average Wind Speed (Day)": forecast.wind_speed_mph,
       "Sky Cover": forecast.clouds,
       "Visibility": forecast.visibility,
       "Relative Humidity": forecast.humidity,
@@ -195,7 +194,7 @@ const TryModelPage = () => {
       setLoading(false);
     }
   };
-  
+
 
   const handleUnlock = () => {
     const loggedIn = localStorage.getItem("user_logged_in");
@@ -228,7 +227,6 @@ const TryModelPage = () => {
 
       {loading && <p className="loading">⏳ Loading forecast...</p>}
 
-      {/* ✅ UPDATED: 3. The display uses the metric (C and kmh) values */}
       {forecast && (
         <div className="forecast-results">
           <div className="forecast-card">

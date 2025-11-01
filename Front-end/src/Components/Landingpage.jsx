@@ -4,7 +4,6 @@ import "./Landingpagestyle.css";
 import solarImage from "../assets/SolarPowerImg.png";
 
 const Landingpage = () => {
-  // Dark theme as default
   const storedTheme = localStorage.getItem("sp_theme") || "dark";
   const isLightInitially = storedTheme === "light";
   document.documentElement.setAttribute("data-theme", storedTheme);
@@ -12,7 +11,6 @@ const Landingpage = () => {
   const [light, setLight] = useState(isLightInitially);
   const navigate = useNavigate();
 
-  // Theme toggle
   const toggleTheme = () => {
     const next = !light;
     setLight(next);
@@ -69,7 +67,7 @@ const Landingpage = () => {
             </p>
 
             <div className="lp-cta-row">
-              <button className="lp-btn lp-primary" onClick={()=>navigate('/trymodelpage')}>Try Demo</button>
+              <button className="lp-btn lp-primary" onClick={() => navigate('/trymodelpage')}>Try Demo</button>
               <a
                 className="lp-btn lp-outline"
                 href="https://github.com/HetLimbani-learnerboy/SolarPower-ML.git"

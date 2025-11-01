@@ -14,8 +14,6 @@ const ForgotPassword = () => {
   const [resendTimer, setResendTimer] = useState(30);
   const otpRefs = useRef([]);
 
-
-  
   const passwordValid = {
     length: password.length >= 8,
     upper: /[A-Z]/.test(password),
@@ -25,7 +23,6 @@ const ForgotPassword = () => {
   };
   const isPasswordMatch = password && password === confirmPassword;
 
-  // Handle OTP input
   const handleOtpChange = (value, i) => {
     if (/^[0-9]?$/.test(value)) {
       const newOtp = [...otp];
@@ -35,7 +32,6 @@ const ForgotPassword = () => {
     }
   };
 
-  // Send OTP
   const sendOtp = async () => {
     setSending(true);
     try {
@@ -64,7 +60,6 @@ const ForgotPassword = () => {
     }
   }, [resendTimer, step]);
 
-  // Verify OTP
   const verifyOtp = async () => {
     try {
       const res = await fetch("http://localhost:3011/api/signin/forgotpassword/verify", {
@@ -87,7 +82,6 @@ const ForgotPassword = () => {
     }
   }, [otp]);
 
-  // Reset password
   const resetPassword = async () => {
     try {
       const res = await fetch("http://localhost:3011/api/signin/forgotpassword/reset", {
