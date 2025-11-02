@@ -11,7 +11,7 @@ const SignIn = () => {
     const [password, setPassword] = useState("");
 
     useEffect(() => {
-        const savedTheme = localStorage.getItem("sp_theme") || "light";
+        const savedTheme = localStorage.getItem("sp_theme") || "dark";
         document.documentElement.setAttribute("data-theme", savedTheme);
     }, []);
 
@@ -38,7 +38,7 @@ const SignIn = () => {
                 alert("Login successful!");
                 navigate("/MainDashboard");
             } else {
-                alert((data && data.message ? data.message : "Login failed") + ", Please Signup Again");
+                alert("Invalid Creadentials, Please check email and password or signup again");
                 const response = await fetch('http://localhost:3011/api/signin/emailnotverified', {
                     method: "DELETE",
                     headers: {

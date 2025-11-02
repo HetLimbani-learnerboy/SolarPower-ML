@@ -470,7 +470,7 @@ a:focus {
 }
 
 .toggle-password:hover {
-  background: #ff9800;
+  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent), var(--accent-2) 30%));
 }
 
 .toggle-password img {
@@ -479,7 +479,7 @@ a:focus {
 }
 
 .signin-btn {
-  background: #ff9800;
+  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent), var(--accent-2) 30%));
   color: #fff;
   padding: 12px 0;
   border: none;
@@ -492,7 +492,7 @@ a:focus {
 }
 
 .signin-btn:hover {
-  background: #fb8c00;
+  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent), var(--accent-2) 30%));
   transform: translateY(-2px);
 }
 
@@ -501,7 +501,7 @@ a:focus {
   display: block;
   margin-top: 0.8rem;
   font-size: 0.9rem;
-  color: #ff9800;
+  color: var(--accent);
   cursor: pointer;
   font-weight: bolder;
 }
@@ -516,7 +516,7 @@ a:focus {
 
 .switch-text span,
 .switch-text-back span {
-  color: #ff9800;
+  color: var(--accent);
   cursor: pointer;
   font-weight: bolder;
 }

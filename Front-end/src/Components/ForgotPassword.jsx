@@ -41,7 +41,7 @@ const ForgotPassword = () => {
         body: JSON.stringify({ email }),
       });
       const data = await res.json();
-      if (!res.ok) alert(data.message);
+      if (!res.ok) alert(data.message + " , Please SignUp");
       else {
         setStep(2);
         setResendTimer(30);
@@ -77,9 +77,12 @@ const ForgotPassword = () => {
   };
 
   useEffect(() => {
+    const savedTheme = localStorage.getItem("sp_theme") || "dark";
+    document.documentElement.setAttribute("data-theme", savedTheme);
     if (step === 2 && otp.join("").length === 6) {
       verifyOtp();
     }
+
   }, [otp]);
 
   const resetPassword = async () => {

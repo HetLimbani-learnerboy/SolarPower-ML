@@ -37,7 +37,7 @@ const SignUp = () => {
     const [otpError, setOtpError] = useState("");
 
     useEffect(() => {
-        const savedTheme = localStorage.getItem("sp_theme") || "light";
+        const savedTheme = localStorage.getItem("sp_theme") || "dark";
         document.documentElement.setAttribute("data-theme", savedTheme);
     }, []);
 

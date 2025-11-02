@@ -575,11 +575,10 @@ const MainDashboard = () => {
   const [predictionData, setPredictionData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  
+
   const [isDownloadingImage, setIsDownloadingImage] = useState(false);
   const [solarCapacity, setSolarCapacity] = useState("");
 
-  // --- Helper Functions (Unchanged) ---
   const avgWindDirection = (dirs) => {
     if (!dirs.length) return 0;
     const radians = dirs.map((deg) => (deg * Math.PI) / 180);
@@ -646,7 +645,6 @@ const MainDashboard = () => {
     };
   };
 
-  // --- Data Fetching (Unchanged) ---
   const fetchWeatherData = async (e) => {
     e.preventDefault();
     if (!location) return alert("Enter a city name!");
@@ -677,7 +675,6 @@ const MainDashboard = () => {
     setLoading(false);
   };
 
-  // --- Prediction (Unchanged) ---
   const handlePredictSolar = async () => {
     const capacity = parseFloat(solarCapacity);
     if (selectedDays.length === 0) {
@@ -723,26 +720,52 @@ const MainDashboard = () => {
   };
 
   const handleDownloadReportImage = async () => {
-    const element = document.getElementById('prediction-table');
-    if (!element) {
+    const tableElement = document.getElementById('prediction-table');
+    if (!tableElement) {
       alert("Error: Could not find report table to download.");
       return;
     }
 
     setIsDownloadingImage(true);
+    const wrapper = document.createElement("div");
+    wrapper.style.padding = "20px";
+    wrapper.style.textAlign = "center";
+    wrapper.style.fontFamily = "Arial, sans-serif";
+    wrapper.style.backgroundColor = "#ffffff";
+    wrapper.style.color = "#000000";
+
+    const name = localStorage.getItem("fullname") || "N/A";
+    const email = localStorage.getItem("email") || "N/A";
+
+    const header = document.createElement("div");
+    header.innerHTML = `
+    <h2 style="margin-bottom: 8px;">🔆 Solar Power Prediction Report</h2>
+    <p style="margin: 4px 0;"><strong>Name:</strong> ${name}</p>
+    <p style="margin: 4px 0;"><strong>Email:</strong> ${email}</p>
+    <p style="margin: 4px 0;"><strong>Solar Capacity:</strong> ${solarCapacity} kWh</p>
+    <hr style="margin: 10px 0;">
+  `;
+
+    const clonedTable = tableElement.cloneNode(true);
+    clonedTable.style.marginTop = "10px";
+    clonedTable.style.width = "100%";
+
+    // Append header + table
+    wrapper.appendChild(header);
+    wrapper.appendChild(clonedTable);
+    document.body.appendChild(wrapper);
 
     try {
-      const canvas = await html2canvas(element, {
-        backgroundColor: "#ffffff", 
-        scale: 1.5, 
+      const canvas = await html2canvas(wrapper, {
+        backgroundColor: "#ffffff",
+        scale: 1.8,
         useCORS: true,
       });
-      
-      const dataUrl = canvas.toDataURL('image/png');
-      
-      const link = document.createElement('a');
+
+      const dataUrl = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
       link.href = dataUrl;
-      link.download = `Solar_Table_${city.replace(', ', '_')}.png`;
+      link.download = `Solar_Report_${name.replace(/\s+/g, "_")}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -751,10 +774,10 @@ const MainDashboard = () => {
       console.error("Error generating image:", err);
       alert("An error occurred while generating the image. See console for details.");
     } finally {
+      document.body.removeChild(wrapper);
       setIsDownloadingImage(false);
     }
   };
-
 
   const toggleDaySelection = (date) => {
     setSelectedDays((prev) =>
@@ -763,7 +786,6 @@ const MainDashboard = () => {
         : [...prev, date]
     );
   };
-
 
   return (
     <div className="dashboard-root">
@@ -777,7 +799,9 @@ const MainDashboard = () => {
             {light ? "🌙 Dark" : "☀️ Light"}
           </button>
           <button className="logout-btn" onClick={() => {
-            localStorage.clear();
+            localStorage.removeItem("email");
+            localStorage.removeItem("fullname");
+            localStorage.removeItem("user");
             window.location.href = "/signinpage";
           }}>
             🔒 Logout
@@ -809,13 +833,7 @@ const MainDashboard = () => {
               <div
                 key={day.date}
                 className={`forecast-card ${selectedDays.includes(day.date) ? "selected" : ""}`}
-                onClick={() =>
-                  setSelectedDays((prev) =>
-                    prev.includes(day.date)
-                      ? prev.filter((d) => d !== date)
-                      : [...prev, day.date]
-                  )
-                }
+                onClick={() => toggleDaySelection(day.date)}
               >
                 <div className="forecast-header">
                   <input type="checkbox" checked={selectedDays.includes(day.date)} readOnly />
@@ -856,7 +874,6 @@ const MainDashboard = () => {
         <div className="prediction-results">
           <div className="results-header">
             <h2>🔆 Solar Power Predictions</h2>
-            {/* 5. MODIFIED the download button */}
             <button
               onClick={handleDownloadReportImage}
               className="wp-btn"
@@ -865,7 +882,7 @@ const MainDashboard = () => {
               {isDownloadingImage ? "📥 Generating..." : "📥 Download Table as Image"}
             </button>
           </div>
-          
+
           <div id="prediction-content">
             <h3>Predicted Power Output (for a {solarCapacity} kWh system):</h3>
 
@@ -884,6 +901,7 @@ const MainDashboard = () => {
                   <th style={{ padding: '8px', border: '1px solid #ddd' }}>Date</th>
                   <th style={{ padding: '8px', border: '1px solid #ddd' }}>Base Power (kWh)</th>
                   <th style={{ padding: '8px', border: '1px solid #ddd' }}>Temp (°C)</th>
+                  <th style={{ padding: '8px', border: '1px solid #ddd' }}>Temp (°F)</th>
                   <th style={{ padding: '8px', border: '1px solid #ddd' }}>Wind Dir</th>
                   <th style={{ padding: '8px', border: '1px solid #ddd' }}>Wind Spd (km/h)</th>
                   <th style={{ padding: '8px', border: '1px solid #ddd' }}>Clouds</th>
@@ -898,8 +916,9 @@ const MainDashboard = () => {
                     backgroundColor: index % 2 === 0 ? 'var(--bg, #f9f9f9)' : 'var(--surface, #fff)'
                   }}>
                     <td style={{ padding: '8px', border: '1px solid #ddd' }}>{p.date}</td>
-                    <td style={{ padding: '8px', border: '1px solid #ddd' }}>{((p.power * parseFloat(solarCapacity)) / 17).toFixed(2)}</td>
+                    <td style={{ padding: '8px', border: '1px solid #ddd' }}>{((p.power * parseFloat(solarCapacity)) / 19).toFixed(2)}</td>
                     <td style={{ padding: '8px', border: '1px solid #ddd' }}>{p.temp_c}</td>
+                    <td style={{ padding: '8px', border: '1px solid #ddd' }}>{p.temp_f}</td>
                     <td style={{ padding: '8px', border: '1px solid #ddd' }}>{p.winddirection}</td>
                     <td style={{ padding: '8px', border: '1px solid #ddd' }}>{p.wind_speed_kmh}</td>
                     <td style={{ padding: '8px', border: '1px solid #ddd' }}>{p.clouds}</td>
