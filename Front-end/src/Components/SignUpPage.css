@@ -67,7 +67,7 @@
 }
 
 .signup-btn:hover {
-    background: #fb8c00;
+    background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent), var(--accent-2) 30%));
     transform: translateY(-2px);
 }
 
