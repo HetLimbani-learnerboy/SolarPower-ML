@@ -1,158 +1,104 @@
-🌞 Solar Power Prediction System
+# 🌞 Solar Power Prediction System
 
-An AI-powered Solar Power Output Prediction System that predicts real-time solar power generation (kW) using weather and location data through a trained Random Forest model.
+An **AI-powered Solar Power Output Prediction System** that predicts real-time solar power generation (kW) using weather and location data through a trained Random Forest model.
 
-⚡ Features
+---
 
-🤖 AI Predictions: Trained ML model for accurate solar output forecasting.
+## ⚡ Features
+- 🤖 **AI Predictions:** Trained ML model for accurate solar output forecasting.  
+- 🔗 **Full-Stack Integration:** React (Frontend) → Node.js (Backend) → Python (ML Engine).  
+- 🧠 **Flask ML API:** Hosts `random_forest_model.pkl` & `scaler.pkl` for live inference.  
+- 📊 **Data Normalization:** Auto-scaling for weather data to match training input.  
+- 🌐 **CORS Enabled:** Smooth API communication across all layers.
 
-🔗 Full-Stack Integration: React (Frontend) → Node.js (Backend) → Python (ML Engine).
+---
 
-🧠 Flask ML API: Hosts random_forest_model.pkl & scaler.pkl for live inference.
+## 🏗️ Architecture
+React.js (Frontend)
+↓ sends weather/location data
+Node.js (Backend)
+↓ forwards to Flask API
+Flask (Python ML API)
+↓ returns predicted solar power (kW)
+React.js (Displays prediction)
 
-📊 Data Normalization: Auto-scaling for weather data to match training input.
-
-🌐 CORS Enabled: Smooth API communication across all layers.
-
-🏗️ Architecture
-
-The system runs on three separate services: a React frontend for the user, a Node.js backend as a middle-man, and a Python Flask API to serve the ML model.
-
-React.js (Frontend) sends weather/location data to the Node.js backend.
-
-Node.js (Backend) receives the request and forwards it to the Flask API.
-
-Flask (Python ML API) uses the trained model to make a prediction.
-
-The predicted solar power (kW) is returned to Node.js, which then sends it back to React.js to be displayed to the user.
-
-📂 Project Structure
-
-SolarPower-ML/
+## 📂 Project Structure
+```SolarPower-ML/
+├── Front-end/ # React.js UI
+│ ├── src/Components/ (MainDashboard.jsx, TryModelPage.jsx)
+│ └── package.json
 │
-├── Front-end/            # React.js UI (the pretty part)
-│   ├── src/
-│   │   ├── Components/
-│   │   │   └── MainDashboard.jsx
-│   │   │   └── TryModelPage.jsx
-│   │   └── ...
-│   ├── public/
-│   └── package.json
+├── Back-end/ # Node.js + Express server
+│ ├── index.js
+│ ├── .env
+│ └── package.json
 │
-├── Back-end/             # Node.js + Express (the middle-man)
-│   ├── index.js
-│   ├── package.json
-│   └── .env
-│
-└── ModelTrain-ML/        # Python ML (the brain)
-    ├── trainmodel.py       # Script to train the brain
-    ├── app.py              # Flask server that runs the brain
-    ├── random_forest_model.pkl
-    ├── scaler.pkl
-    ├── feature_columns.csv
-    └── Solar_Power_Prediction.csv
+└── ModelTrain-ML/ # Python ML model + Flask API
+├── trainmodel.py
+├── app.py
+├── random_forest_model.pkl
+├── scaler.pkl
+└── Solar_Power_Prediction.csv```
 
+## 🚀 Quick Setup:
 
-🚀 Quick Setup
-
-You must run all three services in three separate terminals.
-
-<details>
-<summary><strong>1️⃣ Run the Flask ML Server (Terminal 1)</strong></summary>
-
+### 1️⃣ Flask ML Server
 cd ModelTrain-ML
-
 python3 -m venv venv
-
-source venv/bin/activate (or venv\Scripts\activate on Windows)
-
+source venv/bin/activate     # (Windows: venv\Scripts\activate)
 pip install flask flask-cors scikit-learn pandas numpy joblib
+python3 trainmodel.py        # generate model/scaler files
+python3 app.py               # run Flask at http://localhost:5000
 
-python3 trainmodel.py (Only needed once to generate model files)
-
-python3 app.py
-
-Server will run at http://localhost:5000
-
-</details>
-
-<details>
-<summary><strong>2️⃣ Run the Node.js Backend (Terminal 2)</strong></summary>
-
+2️⃣ Node.js Backend
 cd Back-end
-
 npm install
-
-Create a .env file in this folder with the following content:
-
+# .env
 FLASK_API_URL=http://localhost:5000/predict
+npm run dev                  # run at http://localhost:3011
 
-
-npm run dev
-
-Server will run at http://localhost:3011
-
-</details>
-
-<details>
-<summary><strong>3️⃣ Run the React Frontend (Terminal 3)</strong></summary>
-
+3️⃣ React Frontend
 cd Front-end
-
 npm install
-
-Create a .env file in this folder with the following content:
-
+# .env
 VITE_WEATHER_API_KEY=YOUR_OPENWEATHERMAP_API_KEY
-VITE_WEATHER_BASE_URL=[https://api.openweathermap.org/data/2.5/forecast](https://api.openweathermap.org/data/2.5/forecast)
+VITE_WEATHER_BASE_URL=https://api.openweathermap.org/data/2.5/forecast
 VITE_BACKEND_API_URL=http://localhost:3011/api/predict/solarpowerforecast
-
-
-npm run dev
-
-App will be available at http://localhost:5173
-
-</details>
-
+npm run dev                  # run at http://localhost:5173
 📡 Example API Call
-
-You can test the full stack by sending a POST request to the Node.js backend:
-
-URL: POST http://localhost:3011/api/predict/solarpower
-
+POST: http://localhost:3011/api/predict/solarpower
 Body:
-
 {
-  "IsDaylight": 1,
-  "Average_Temperature": 29.8,
-  "Average_Wind_Direction": 5,
-  "Average_Wind_Speed": 4.2,
-  "Sky_Cover": 2,
-  "Visibility": 8,
-  "Relative_Humidity": 65,
-  "Average_Barometric_Pressure": 29.6,
-  "Month": 10,
-  "Day": 15
+  "IsDaylight": 1,
+  "Average_Temperature": 29.8,
+  "Average_Wind_Direction": 5,
+  "Average_Wind_Speed": 4.2,
+  "Sky_Cover": 2,
+  "Visibility": 8,
+  "Relative_Humidity": 65,
+  "Average_Barometric_Pressure": 29.6,
+  "Month": 10,
+  "Day": 15
 }
-
-
 Response:
-
-{
-  "predicted_power_kW": 3.471
-}
-
+{ "predicted_power_kW": 3.471 }
 
 👨‍💻 Authors
-
-Het Limbani: 🌞 Solar Power ML Integration | MERN + Python Developer
-
-Anuj Raval: 🌞 Solar Power ML Integration | Python Developer
+## Name	Role:
+```1. Het Limbani: 🌞 Solar Power ML Integration | MERN + Python Developer
+2: Anuj Raval: 🌞 Solar Power ML Integration | Python Developer```
 
 💡 Notes
+1. Run all three servers (React, Node, Flask) together.
+2. Keep ports consistent (5173 → 3011 → 5000).
 
-Run all three servers (React, Node, Flask) at the same time for the app to work.
+Use flask_cors for cross-origin requests.3. 
+🏁 One-Command Summary
+# Run Flask ML Server
+cd ModelTrain-ML && source venv/bin/activate && python3 app.py
 
-Keep the ports consistent (5173 → 3011 → 5000).
+# Run Node Backend
+cd Back-end && npm run dev
 
-flask_cors is used in app.py to handle cross-origin requests from the Node.js backend.
+# Run React Frontend
+cd Front-end && npm run dev
