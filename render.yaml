@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: solarpower-ml
+    env: python
+    buildCommand: |
+      pip install poetry
+      poetry install
+    startCommand: |
+      poetry run python app.py
