@@ -544,12 +544,11 @@ import {
   BarChart, Bar
 } from "recharts";
 import "./MainDashboard.css";
-
-// 1. Import ONLY html2canvas (no more jspdf)
 import html2canvas from 'html2canvas';
 
 const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 const BASE_URL = import.meta.env.VITE_WEATHER_BASE_URL;
+const ML_API = import.meta.env.VITE_ML_API || 'http://localhost:8000'
 
 const MainDashboard = () => {
   const [light, setLight] = useState(
@@ -702,7 +701,7 @@ const MainDashboard = () => {
         "Day": forecastDate.getDate(),
       };
     });
-    const response = await fetch("http://localhost:3011/api/predict/solarpowerforecast", {
+    const response = await fetch(`${ML_API}/api/predict/solarpowerforecast`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payloads),
@@ -750,7 +749,6 @@ const MainDashboard = () => {
     clonedTable.style.marginTop = "10px";
     clonedTable.style.width = "100%";
 
-    // Append header + table
     wrapper.appendChild(header);
     wrapper.appendChild(clonedTable);
     document.body.appendChild(wrapper);

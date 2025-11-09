@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import eyeOpen from '../assets/eye_open.png';
 import eyeClose from '../assets/eye-close.svg';
 import "./SignUpPage.css";
-
-const API_BASE = "http://localhost:3011";
+const ML_API = import.meta.env.VITE_ML_API || 'http://localhost:8000'
 
 const SignUp = () => {
     const navigate = useNavigate();
@@ -81,7 +80,7 @@ const SignUp = () => {
 
         setLoading(true);
         try {
-            const res = await fetch(`${API_BASE}/api/signup`, {
+            const res = await fetch(`${ML_API}/api/signup`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -156,7 +155,7 @@ const SignUp = () => {
 
         setLoading(true);
         try {
-            const res = await fetch(`${API_BASE}/api/signup/verify/${userId}`, {
+            const res = await fetch(`${ML_API}/api/signup/verify/${userId}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ otp }),
@@ -184,7 +183,7 @@ const SignUp = () => {
         setResendLoading(true);
         setOtpError("");
         try {
-            const res = await fetch(`${API_BASE}/api/signup/resend-otp/${userId}`, {
+            const res = await fetch(`${ML_API}/api/signup/resend-otp/${userId}`, {
                 method: "GET",
             });
             const data = await res.json();

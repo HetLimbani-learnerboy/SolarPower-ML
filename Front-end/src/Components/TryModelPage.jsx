@@ -4,6 +4,7 @@ import "./TryModelPage.css";
 
 const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 const BASE_URL = import.meta.env.VITE_WEATHER_BASE_URL;
+const ML_API = import.meta.env.VITE_ML_API || 'http://localhost:8000'
 
 const TryModelPage = () => {
   const navigate = useNavigate();
@@ -173,7 +174,7 @@ const TryModelPage = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:3011/api/predict/solarpower",
+        `${ML_API}/api/predict/solarpower`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

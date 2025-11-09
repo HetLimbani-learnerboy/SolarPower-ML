@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import eyeOpen from '../assets/eye_open.png';
 import eyeClose from '../assets/eye-close.svg';
 import "./SignIn.css";
+const ML_API = import.meta.env.VITE_ML_API || 'http://localhost:8000'
 
 const SignIn = () => {
     const navigate = useNavigate();
@@ -23,7 +24,7 @@ const SignIn = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch('http://localhost:3011/api/signin', {
+            const response = await fetch(`${ML_API}/api/signin`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -39,7 +40,7 @@ const SignIn = () => {
                 navigate("/MainDashboard");
             } else {
                 alert("Invalid Creadentials, Please check email and password or signup again");
-                const response = await fetch('http://localhost:3011/api/signin/emailnotverified', {
+                const response = await fetch(`${ML_API}/api/signin/emailnotverified`, {
                     method: "DELETE",
                     headers: {
                         "Content-Type": "application/json",
