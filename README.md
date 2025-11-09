@@ -69,12 +69,6 @@ graph TD
   - CSS Modules
   - OpenWeatherMap API
 
-- **Backend**
-  - Node.js
-  - Express.js
-  - CORS middleware
-  - Environment configuration
-
 - **Machine Learning**
   - Python 3.x
   - Flask
@@ -97,13 +91,7 @@ SolarPower-ML/
 │   │   └── App.jsx          # Main app component
 │   ├── index.html
 │   └── package.json
-│
-├── Back-end/                  # Node.js + Express server
-│   ├── index.js              # Server entry point
-│   ├── routes/              # API routes
-│   ├── .env                 # Environment variables
-│   └── package.json
-│
+|
 └── ModelTrain-ML/            # Python ML model + Flask API
     ├── train_model.py       # Model training script
     ├── app.py              # Flask API server
