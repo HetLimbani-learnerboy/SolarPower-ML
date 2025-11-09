@@ -140,7 +140,6 @@ const WeatherPage = () => {
     }
   };
 
-  // 🔓 Handle sign-in unlock
   const handleUnlock = () => {
     const loggedIn = localStorage.getItem("user_logged_in");
     if (!loggedIn) {

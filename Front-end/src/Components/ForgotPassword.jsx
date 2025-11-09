@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ForgotPassword.css";
+const ML_API = import.meta.env.VITE_ML_API || 'http://localhost:8000'
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ const ForgotPassword = () => {
   const sendOtp = async () => {
     setSending(true);
     try {
-      const res = await fetch("http://localhost:3011/api/signin/forgotpassword/auth", {
+      const res = await fetch(`${ML_API}/api/signin/forgotpassword/auth`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -62,7 +63,7 @@ const ForgotPassword = () => {
 
   const verifyOtp = async () => {
     try {
-      const res = await fetch("http://localhost:3011/api/signin/forgotpassword/verify", {
+      const res = await fetch(`${ML_API}/api/signin/forgotpassword/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp: otp.join("") }),
@@ -87,7 +88,7 @@ const ForgotPassword = () => {
 
   const resetPassword = async () => {
     try {
-      const res = await fetch("http://localhost:3011/api/signin/forgotpassword/reset", {
+      const res = await fetch(`${ML_API}/api/signin/forgotpassword/reset`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp: otp.join(""), password }),
