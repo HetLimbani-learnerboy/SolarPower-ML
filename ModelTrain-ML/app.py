@@ -35,7 +35,6 @@ users_collection = db["users"]
 
 # -------------------------------------------------------------------
 # 📧 Resend API Setup (Replaces Flask-Mail)
-# -------------------------------------------------------------------
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 SENDER_EMAIL = os.getenv("EMAIL_FROM") or "SolarPower-ML <no-reply@resend.dev>"
 
