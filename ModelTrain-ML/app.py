@@ -1,79 +1,34 @@
 import os
 import random
 import datetime
-import requests
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
+from flask_mail import Mail, Message
 from pymongo import MongoClient
 import pandas as pd
 import joblib
 import numpy as np
-from bson.objectid import ObjectId
-from sklearn.impute import KNNImputer
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
-# -------------------------------------------------------------------
-# 🌞 Load environment + Flask setup
-# -------------------------------------------------------------------
 load_dotenv()
 app = Flask(__name__)
 CORS(app)
 bcrypt = Bcrypt(app)
 
-# -------------------------------------------------------------------
-# 🗄️ MongoDB Connection
-# -------------------------------------------------------------------
 mongo_uri = os.environ.get("MONGO_URI")
 client = MongoClient(mongo_uri)
 db = client["SolarPower-ML"]
 users_collection = db["users"]
 
-# -------------------------------------------------------------------
-# 📧 Resend API Setup (Replaces Flask-Mail)
-RESEND_API_KEY = os.getenv("RESEND_API_KEY")
-SENDER_EMAIL = os.getenv("EMAIL_FROM") or "SolarPower-ML <no-reply@resend.dev>"
+app.config["MAIL_SERVER"] = "smtp.gmail.com"
+app.config["MAIL_PORT"] = 587
+app.config["MAIL_USE_TLS"] = True
+app.config["MAIL_USERNAME"] = os.environ.get("EMAIL_USER")
+app.config["MAIL_PASSWORD"] = os.environ.get("EMAIL_PASS")
+app.config["MAIL_DEFAULT_SENDER"] = os.environ.get("EMAIL_FROM") or os.environ.get("EMAIL_USER")
+mail = Mail(app)
 
-def send_email(to_email, otp, subject):
-    """Send OTP Email using Resend API (HTTPS-based)."""
-    html_content = f"""
-    <div style="font-family: Arial; font-size:16px; color:#222; background:#f9f9f9; padding:20px; border-radius:8px;">
-        <h2 style="color:#007BFF;">{subject}</h2>
-        <p>Your One-Time Password (OTP) is:</p>
-        <h1 style="letter-spacing:2px;">{otp}</h1>
-        <p>This code will expire in 5 minutes.</p>
-        <hr>
-        <p>Best Regards,<br><strong>SolarPower-ML Team ☀️</strong></p>
-    </div>
-    """
-    headers = {
-        "Authorization": f"Bearer {RESEND_API_KEY}",
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "from": SENDER_EMAIL,
-        "to": [to_email],
-        "subject": subject,
-        "html": html_content
-    }
-
-    try:
-        r = requests.post("https://api.resend.com/emails", headers=headers, json=payload)
-        if r.status_code not in [200, 202]:
-            print("❌ Resend API Error:", r.text)
-            raise Exception(r.text)
-        print(f"✅ OTP email sent to {to_email}")
-    except Exception as e:
-        print("❌ Email send failed:", e)
-        raise
-
-# -------------------------------------------------------------------
-# 🤖 ML Model Loading
-# -------------------------------------------------------------------
 MODEL_PATH = "random_forest_model.pkl"
 SCALER_PATH = "scaler.pkl"
 FEATURE_PATH = "feature_columns.csv"
@@ -88,12 +43,23 @@ else:
     feature_columns = pd.read_csv(FEATURE_PATH).columns.tolist()
     print("✅ Model, Scaler, and Feature Columns Loaded")
 
-# -------------------------------------------------------------------
-# 🔧 Utility Functions
-# -------------------------------------------------------------------
+
 def generate_otp():
     """Generate a random 6-digit OTP"""
     return str(random.randint(100000, 999999))
+
+def send_email(to_email, otp, subject):
+    """Send OTP Email"""
+    html = f"""
+    <div style="font-family: Arial; font-size:16px; color:#222;">
+        <h3>{subject}</h3>
+        <p>Your OTP code is:</p>
+        <h2>{otp}</h2>
+        <p>This code will expire in 5 minutes.</p>
+    </div>
+    """
+    msg = Message(subject=subject, recipients=[to_email], html=html)
+    mail.send(msg)
 
 
 def train_model():
@@ -185,14 +151,12 @@ def predict_power():
         "input_used": data
     })
 
-
-# -------------------------------------------------------------------
-# 🧾 SIGNUP - Register User and Send OTP
-# -------------------------------------------------------------------
 @app.route("/api/signup", methods=["POST"])
 def signup():
     data = request.get_json()
-    fullname, email, password = data.get("fullname"), data.get("email"), data.get("password")
+    fullname = data.get("fullname")
+    email = data.get("email")
+    password = data.get("password")
 
     if not fullname or not email or not password:
         return jsonify({"message": "Please fill all required fields"}), 400
@@ -203,11 +167,12 @@ def signup():
             return jsonify({"message": "User already exists"}), 400
         else:
             users_collection.delete_one({"email": email})
-
+            
     hashed_pw = bcrypt.generate_password_hash(password).decode("utf-8")
+
     otp = generate_otp()
     otp_expiry = datetime.datetime.utcnow() + datetime.timedelta(minutes=5)
-
+    
     new_user = {
         "fullname": fullname,
         "email": email,
@@ -216,11 +181,13 @@ def signup():
         "otp": otp,
         "otpExpiry": otp_expiry
     }
-    user_id = str(users_collection.insert_one(new_user).inserted_id)
+    result = users_collection.insert_one(new_user)
+    user_id = str(result.inserted_id)
 
     try:
         send_email(email, otp, "Verify your SolarPower-ML Account")
-    except Exception:
+    except Exception as e:
+        print("❌ Email send failed:", e)
         return jsonify({"message": "Failed to send OTP email"}), 500
 
     return jsonify({
@@ -228,11 +195,9 @@ def signup():
         "user": {"id": user_id, "fullname": fullname, "email": email}
     }), 201
 
-# -------------------------------------------------------------------
-# 🔁 RESEND OTP
-# -------------------------------------------------------------------
 @app.route("/api/signup/resend-otp/<string:user_id>", methods=["GET"])
 def resend_otp(user_id):
+    from bson.objectid import ObjectId
     try:
         user = users_collection.find_one({"_id": ObjectId(user_id)})
     except Exception:
@@ -253,7 +218,8 @@ def resend_otp(user_id):
 
     try:
         send_email(user["email"], otp, "Resend: Verify your SolarPower-ML Account")
-    except Exception:
+    except Exception as e:
+        print("❌ Email send failed:", e)
         return jsonify({"message": "Failed to resend OTP"}), 500
 
     return jsonify({"message": "OTP resent successfully"}), 200
@@ -328,11 +294,9 @@ def predict_multiple_days():
         return jsonify({"error": "Prediction failed", "details": str(e)}), 500
 
 
-# -------------------------------------------------------------------
-# ✅ VERIFY OTP
-# -------------------------------------------------------------------
 @app.route("/api/signup/verify/<string:user_id>", methods=["POST"])
 def verify_email(user_id):
+    from bson.objectid import ObjectId
     data = request.get_json()
     otp = data.get("otp")
 
@@ -348,6 +312,8 @@ def verify_email(user_id):
         return jsonify({"message": "User not found"}), 404
     if user.get("isverified"):
         return jsonify({"message": "User already verified"}), 400
+    if not user.get("otp"):
+        return jsonify({"message": "No OTP found. Please resend OTP"}), 400
     if datetime.datetime.utcnow() > user["otpExpiry"]:
         return jsonify({"message": "OTP expired. Please resend OTP"}), 400
     if user["otp"] != otp:
@@ -360,33 +326,49 @@ def verify_email(user_id):
 
     return jsonify({
         "message": "Email verified successfully!",
-        "user": {"id": str(user["_id"]), "fullname": user["fullname"], "email": user["email"]}
+        "user": {
+            "id": str(user["_id"]),
+            "fullname": user["fullname"],
+            "email": user["email"]
+        }
     }), 200
 
-# -------------------------------------------------------------------
-# 🔑 SIGNIN
-# -------------------------------------------------------------------
 @app.route("/api/signin", methods=["POST"])
 def signin():
     data = request.get_json()
-    email, password = data.get("email"), data.get("password")
+    email = data.get("email")
+    password = data.get("password")
 
     if not email or not password:
         return jsonify({"message": "Please enter all required fields"}), 400
 
-    user = users_collection.find_one({"email": email})
-    if not user:
-        return jsonify({"message": "User does not exist"}), 401
-    if not user.get("isverified", False):
-        users_collection.delete_one({"email": email})
-        return jsonify({"message": "Email not verified. Please sign up again."}), 403
-    if not bcrypt.check_password_hash(user["password"], password):
-        return jsonify({"message": "Invalid credentials"}), 401
+    try:
+        user = users_collection.find_one({"email": email})
+        if not user:
+            return jsonify({"message": "User does not exist"}), 401
 
-    return jsonify({
-        "message": "Login successful",
-        "user": {"id": str(user["_id"]), "fullname": user["fullname"], "email": user["email"]}
-    }), 200
+        if not user.get("isverified", "false"):
+            users_collection.delete_one({"email": email})
+            return jsonify({
+                "message": "Email not verified. Please sign up again."
+            }), 403  
+
+        if not bcrypt.check_password_hash(user["password"], password):
+            return jsonify({"message": "Invalid credentials"}), 401
+
+        return jsonify({
+            "message": "Login successful",
+            "user": {
+                "id": str(user["_id"]),
+                "fullname": user.get("fullname"),
+                "email": user.get("email"),
+                "phonenumber": user.get("phonenumber", "")
+            }
+        }), 200
+
+    except Exception as e:
+        print("Error during signin:", e)
+        return jsonify({"message": "Server error"}), 500
 
 
 @app.route("/api/signin/emailnotverified", methods=["DELETE"])
@@ -410,24 +392,28 @@ def delete_unverified_user():
         return jsonify({"message": "Server error"}), 500
 
 
+
 @app.route("/api/signin/forgotpassword/auth", methods=["POST"])
 def forgot_password():
     data = request.get_json()
     email = data.get("email")
     if not email:
         return jsonify({"message": "Email is required"}), 400
-
     user = users_collection.find_one({"email": email})
     if not user:
         return jsonify({"message": "User not found. Please sign up first."}), 404
-
     otp = generate_otp()
     otp_expiry = datetime.datetime.utcnow() + datetime.timedelta(minutes=5)
-    users_collection.update_one({"email": email}, {"$set": {"otp": otp, "otpExpiry": otp_expiry}})
+
+    users_collection.update_one(
+        {"email": email},
+        {"$set": {"otp": otp, "otpExpiry": otp_expiry}}
+    )
 
     try:
         send_email(email, otp, "SolarPower-ML Password Reset OTP")
-    except Exception:
+    except Exception as e:
+        print("❌ Email send failed:", e)
         return jsonify({"message": "Failed to send OTP email"}), 500
 
     return jsonify({"message": "Password reset OTP sent successfully"}), 200
@@ -466,6 +452,7 @@ def reset_password():
         {"email": email},
         {"$set": {"password": hashed_pw, "otp": None, "otpExpiry": None}}
     )
+
     return jsonify({"message": "Password reset successful"}), 200
 
 if __name__ == "__main__":
