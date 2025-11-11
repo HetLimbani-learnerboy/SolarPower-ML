@@ -45,7 +45,7 @@ An **AI-powered Solar Power Output Prediction System** that leverages machine le
 
 ```mermaid
 graph TD
-    A[React Frontend] -->|Weather & Location Data| B[Node.js Backend]
+    A[React Frontend] -->|Weather & Location Data| B[Flask ML Backend]
     B -->|Processed Data| C[Flask ML API]
     C -->|ML Model| D[Random Forest Predictor]
     D -->|Power Output| C
@@ -54,7 +54,7 @@ graph TD
 ```
 
 - **Frontend Layer**: React.js with Vite
-- **Backend Layer**: Node.js with Express
+- **Backend Layer**: Flask API
 - **ML Layer**: Flask API with scikit-learn
 </details>
 
