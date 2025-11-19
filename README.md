@@ -69,7 +69,7 @@ graph TD
   - CSS Modules
   - OpenWeatherMap API
 
-- **Machine Learning**
+- **Machine Learning and Backend**
   - Python 3.x
   - Flask
   - scikit-learn
@@ -94,7 +94,8 @@ SolarPower-ML/
 |
 └── ModelTrain-ML/            # Python ML model + Flask API
     ├── train_model.py       # Model training script
-    ├── app.py              # Flask API server
+    ├── app.py              # Flask API server with email integration
+    ├── index.py            # Flask API server without email integration
     ├── requirements.txt    # Python dependencies
     ├── models/            # Saved model files
     └── data/             # Training data
@@ -119,7 +120,8 @@ pip install -r requirements.txt
 
 # Train model and start server
 python train_model.py        # Generate model files
-python app.py               # Run at http://localhost:5000
+python app.py               # If required email integration
+python index.py               # If don't required email integration
 ```
 </details>
 
