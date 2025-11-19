@@ -22,9 +22,6 @@ db = client["SolarPower-ML"]
 users_collection = db["users"]
 
 app.config["MAIL_SERVER"] = "smtp.gmail.com"
-app.config["MAIL_PORT"] = 587
-app.config["MAIL_USE_TLS"] = True
-app.config["MAIL_DEFAULT_SENDER"] = os.environ.get("EMAIL_FROM") or os.environ.get("EMAIL_USER")
 mail = Mail(app)
 
 MODEL_PATH = "random_forest_model.pkl"
