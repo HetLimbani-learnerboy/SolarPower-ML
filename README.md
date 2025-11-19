@@ -92,7 +92,7 @@ SolarPower-ML/
 │   ├── index.html
 │   └── package.json
 |
-└── ModelTrain-ML/            # Python ML model + Flask API
+└── Backend-ModelTrain/            # Python ML model + Flask API
     ├── train_model.py       # Model training script
     ├── app.py              # Flask API server with email integration
     ├── index.py            # Flask API server without email integration
@@ -109,7 +109,7 @@ SolarPower-ML/
 
 ```bash
 # Navigate to ML directory
-cd ModelTrain-ML
+cd Backend-ModelTrain
 
 # Create and activate virtual environment
 python3 -m venv venv
