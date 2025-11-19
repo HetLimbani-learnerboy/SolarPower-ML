@@ -1,11 +1,10 @@
-flask
+Flask
 flask-cors
-flask-bcrypt
+Flask-Bcrypt
 pymongo
 python-dotenv
-requests
+gunicorn
 pandas
 numpy
-scikit-learn
 joblib
-gunicorn
+scikit-learn
