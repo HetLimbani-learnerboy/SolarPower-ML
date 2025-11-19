@@ -127,7 +127,7 @@ python index.py               # If don't required email integration
 
 
 <details>
-<summary>3️⃣ React Frontend Setup</summary>
+<summary>2️⃣ React Frontend Setup</summary>
 
 ```bash
 # Navigate to frontend directory
