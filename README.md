@@ -201,8 +201,7 @@ Please read our [Contributing Guidelines](CONTRIBUTING.md) for details.
 <summary>View Important Notes</summary>
 
 1. Ensure all three servers are running simultaneously
-2. Maintain consistent ports (5173 → 3011 → 5000)
-3. Configure CORS settings appropriately
-4. Keep environment variables secure
-5. Regular model retraining recommended
+2. Configure CORS settings appropriately
+3. Keep environment variables secure
+4. Regular model retraining recommended
 </details>
