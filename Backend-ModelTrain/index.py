@@ -1,11 +1,9 @@
 import os
-import random
 import datetime
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
-from flask_mail import Mail, Message
 from pymongo import MongoClient
 import pandas as pd
 import joblib
@@ -21,8 +19,6 @@ client = MongoClient(mongo_uri)
 db = client["SolarPower-ML"]
 users_collection = db["users"]
 
-app.config["MAIL_SERVER"] = "smtp.gmail.com"
-mail = Mail(app)
 
 MODEL_PATH = "random_forest_model.pkl"
 SCALER_PATH = "scaler.pkl"
@@ -126,6 +122,7 @@ def predict_power():
         "predicted_power_kW": round(predicted_kw, 3),
         "input_used": data
     })
+    
 @app.route("/api/signup", methods=["POST"])
 def signup():
     data = request.get_json()
@@ -136,8 +133,7 @@ def signup():
     if not fullname or not email or not password:
         return jsonify({"message": "Please fill all required fields"}), 400
 
-    existing_user = users_collection.find_one({"email": email})
-    if existing_user:
+    if users_collection.find_one({"email": email}):
         return jsonify({"message": "User already exists"}), 400
 
     hashed_pw = bcrypt.generate_password_hash(password).decode("utf-8")
@@ -146,17 +142,16 @@ def signup():
         "fullname": fullname,
         "email": email,
         "password": hashed_pw,
-        "isverified": True,  
+        "isverified": True, 
         "createdAt": datetime.datetime.utcnow()
     }
 
     result = users_collection.insert_one(new_user)
-    user_id = str(result.inserted_id)
 
     return jsonify({
         "message": "Signup successful",
         "user": {
-            "id": user_id,
+            "id": str(result.inserted_id),
             "fullname": fullname,
             "email": email
         }
@@ -241,35 +236,23 @@ def signin():
     if not email or not password:
         return jsonify({"message": "Please enter all required fields"}), 400
 
-    try:
-        user = users_collection.find_one({"email": email})
-        if not user:
-            return jsonify({"message": "User does not exist"}), 401
+    user = users_collection.find_one({"email": email})
 
-        if not user.get("isverified", "false"):
-            users_collection.delete_one({"email": email})
-            return jsonify({
-                "message": "Email not verified. Please sign up again."
-            }), 403  
+    if not user:
+        return jsonify({"message": "User does not exist"}), 401
 
-        if not bcrypt.check_password_hash(user["password"], password):
-            return jsonify({"message": "Invalid credentials"}), 401
+    if not bcrypt.check_password_hash(user["password"], password):
+        return jsonify({"message": "Invalid credentials"}), 401
 
-        return jsonify({
-            "message": "Login successful",
-            "user": {
-                "id": str(user["_id"]),
-                "fullname": user.get("fullname"),
-                "email": user.get("email"),
-                "phonenumber": user.get("phonenumber", "")
-            }
-        }), 200
+    return jsonify({
+        "message": "Login successful",
+        "user": {
+            "id": str(user["_id"]),
+            "fullname": user.get("fullname"),
+            "email": user.get("email")
+        }
+    }), 200
 
-    except Exception as e:
-        print("Error during signin:", e)
-        return jsonify({"message": "Server error"}), 500
-    
-    
 @app.route("/api/signin/forgotpassword/auth", methods=["POST"])
 def forgot_password_auth():
     data = request.get_json()
@@ -290,8 +273,7 @@ def forgot_password_reset():
     if not email or not password:
         return jsonify({"message": "Email & password required"}), 400
 
-    user = users_collection.find_one({"email": email})
-    if not user:
+    if not users_collection.find_one({"email": email}):
         return jsonify({"message": "User not found"}), 404
 
     hashed_pw = bcrypt.generate_password_hash(password).decode("utf-8")
@@ -305,8 +287,6 @@ def forgot_password_reset():
     )
 
     return jsonify({"message": "Password reset successful"}), 200
-
-
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
